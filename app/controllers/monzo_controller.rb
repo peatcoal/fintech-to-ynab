@@ -18,19 +18,34 @@ class MonzoController < ApplicationController
     if foreign_transaction
       money = Money.new(webhook[:data][:local_amount].abs, webhook[:data][:local_currency])
       description.prepend("(#{money.format}) ")
-      flag = 'orange'
+      flag = 'orange' unless ENV['SKIP_FOREIGN_CURRENCY_FLAG'].present?
     end
 
-    description.prepend("#{webhook[:data][:merchant][:emoji]} ") if webhook[:data][:merchant].try(:[], :emoji)
-    description << webhook[:data][:merchant][:metadata][:suggested_tags] if webhook[:data][:merchant].try(:[], :metadata).try(:[], :suggested_tags)
+    unless ENV['SKIP_EMOJI'].present?
+      description.prepend("#{webhook[:data][:merchant][:emoji]} ") if webhook[:data][:merchant].try(:[], :emoji)
+    end
+
+    unless ENV['SKIP_TAGS'].present?
+      description << webhook[:data][:merchant][:metadata][:suggested_tags] if webhook[:data][:merchant].try(:[], :metadata).try(:[], :suggested_tags)
+    end
+
+    # If this is a split repayment, then add that to the description
+    if webhook[:data][:metadata].try(:[], :p2p_initiator) == 'payment-request' && webhook[:data][:merchant].present? && webhook[:data][:counterparty].present?
+      description << " (Repayment to #{webhook[:data][:counterparty][:name]})"
+    end
+
+    # @todo remove the final fall back at some point. It will be a breaking change.
+    ynab_account_id = params[:ynab_account_id] || ENV['YNAB_MONZO_ACCOUNT_ID'] || ENV['YNAB_ACCOUNT_ID']
 
     ynab_creator = YNAB::TransactionCreator.new(
+      id: "M#{webhook[:data][:id]}",
       date: Time.parse(webhook[:data][:created]).to_date,
       amount: webhook[:data][:amount] * 10,
       payee_name: payee_name,
       description: description.strip,
       cleared: !foreign_transaction,
-      flag: flag
+      flag: flag,
+      account_id: ynab_account_id
     )
 
     create = ynab_creator.create

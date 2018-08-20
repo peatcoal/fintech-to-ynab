@@ -1,11 +1,9 @@
 # Fintech to YNAB
 
 [![Docker](https://img.shields.io/docker/build/fintechtoynab/fintech-to-ynab.svg)](https://hub.docker.com/r/fintechtoynab/fintech-to-ynab)
-
+[![CircleCI](https://circleci.com/gh/fintech-to-ynab/fintech-to-ynab.svg?style=svg)](https://circleci.com/gh/fintech-to-ynab/fintech-to-ynab)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/fintech-to-ynab/fintech-to-ynab)
-
-> **This version requires beta access to the [YNAB API](https://api.youneedabudget.com/), please use the [v1 branch](https://github.com/scottrobertson/fintech-to-ynab/tree/v1) if you do not have access**
 
 Automatically push Monzo and Starling transactions to YNAB in realtime. Also import historical transactions for many more banks.
 
@@ -20,7 +18,7 @@ Automatically push Monzo and Starling transactions to YNAB in realtime. Also imp
 
 Please see our [Getting Started](https://github.com/fintech-to-ynab/fintech-to-ynab/wiki/Getting-Started) guide to see how to set Fintech to YNAB up.
 
-## Imports
+## Banks/Financial Institutions
 
 As well as real-time webhooks, we also support bulk/historical imports for the following financial institutions:
 
@@ -38,5 +36,7 @@ As well as real-time webhooks, we also support bulk/historical imports for the f
 - [TSB](https://github.com/fintech-to-ynab/fintech-to-ynab/wiki/import:-Teller)
 - [Ulster Bank NI](https://github.com/fintech-to-ynab/fintech-to-ynab/wiki/import:-Teller)
 - [HSBC UK](https://github.com/fintech-to-ynab/fintech-to-ynab/wiki/import:-Teller)
+
+*To request a new Bank/Financial Institution, please comment [here](https://github.com/fintech-to-ynab/fintech-to-ynab/issues/73).*
 
 > This app is not officially supported by YNAB in any way. Use of this app could introduce problems into your budget that YNAB, through its official support channels, will not be able to troubleshoot or fix. Please use at your own risk!

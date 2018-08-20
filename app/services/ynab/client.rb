@@ -1,9 +1,8 @@
 class YNAB::Client
-
   def initialize(access_token, budget_id = nil, account_id = nil)
     @access_token = access_token
     @budget_id = budget_id || ENV['YNAB_BUDGET_ID']
-    @account_id = account_id || ENV['YNAB_ACCOUNT_ID']
+    @account_id = account_id
   end
 
   def budgets
@@ -12,6 +11,10 @@ class YNAB::Client
 
   def accounts
     @_accounts ||= client.accounts.get_accounts(selected_budget_id).data.accounts
+  end
+
+  def category(category_id)
+    client.categories.get_category_by_id(selected_budget_id, category_id).data.category
   end
 
   def transactions(since_date: nil)
@@ -32,14 +35,21 @@ class YNAB::Client
         import_id: id
       }
     }).data.transaction
-  rescue YnabApi::ApiError => e
-    JSON.parse(e.response_body)
+  rescue => e
+    Rails.logger.error('YNAB::Client.create_transaction failure')
+    Rails.logger.error("YNAB::Client.create_transaction Response: #{e.response_body}")
+    Rails.logger.error(e)
+    false
   end
 
   def create_transactions(transactions)
     client.transactions.bulk_create_transactions(selected_budget_id, { transactions: transactions }).data.bulk
-  rescue YnabApi::ApiError => e
-    JSON.parse(e.response_body)
+  rescue => e
+    Rails.logger.error('YNAB::Client.create_transactions failure')
+    Rails.logger.error("YNAB::Client.create_transactions Request Body: #{transactions}")
+    Rails.logger.error("YNAB::Client.create_transactions Response: #{e.response_body}")
+    Rails.logger.error(e)
+    false
   end
 
   def selected_budget_id
@@ -47,7 +57,7 @@ class YNAB::Client
   end
 
   def selected_account_id
-   @account_id || accounts.reject{|a| a.closed}.select{|a| a.type == 'checking'}.first.id
+    @account_id || accounts.reject(&:closed).select { |a| a.type == 'checking' }.first.id
   end
 
   protected

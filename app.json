@@ -12,12 +12,28 @@
       "description": "Optional: Default budget ID. If not provided, we will use the first budget.",
       "required": false
     },
-    "YNAB_ACCOUNT_ID": {
-      "description": "Optional: Default account ID. If not provided, we will use the first YNAB account.",
+    "YNAB_MONZO_ACCOUNT_ID": {
+      "description": "Optional: Monzo account ID. If not provided, we will use the first YNAB account.",
       "required": false
     },
     "YNAB_STARLING_ACCOUNT_ID": {
-      "description": "Optional: Starling account id. If not provided, we will use the first YNAB account.",
+      "description": "Optional: Starling account ID. If not provided, we will use the first YNAB account.",
+      "required": false
+    },
+    "SKIP_EMOJI": {
+      "description": "Optional: This will tell Fintech to YNAB not to add the emoji to the descriptions. (Monzo Only)",
+      "required": false
+    },
+    "SKIP_FOREIGN_CURRENCY_FLAG": {
+      "description": "Optional: This will tell Fintech to YNAB not to add flags to foreign currency transactions.",
+      "required": false
+    },
+    "SKIP_TAGS": {
+      "description": "Optional: This will tell Fintech to YNAB not to add hashtags to the transaction description. (Monzo Only)",
+      "required": false
+    },
+    "PUSHBULLET_API_KEY": {
+      "description": "Optional: Push category balance notifications to Pushbullet",
       "required": false
     },
     "URL_SECRET": {

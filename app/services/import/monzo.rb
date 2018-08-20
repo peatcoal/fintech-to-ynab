@@ -1,5 +1,4 @@
 class Import::Monzo
-
   BASE_URL = 'https://api.monzo.com'
 
   def initialize(access_token, monzo_account_id, ynab_account_id, from: 1.year.ago)
@@ -11,7 +10,7 @@ class Import::Monzo
 
   def import
     transactions_to_create = []
-    transactions.reject{|t| t[:decline_reason].present? || t[:amount] == 0 }.each do |transaction|
+    transactions.reject { |t| t[:decline_reason].present? || t[:amount] == 0 }.each do |transaction|
       payee_name = transaction[:merchant].try(:[], :name)
       payee_name ||= transaction[:counterparty][:name] if transaction[:counterparty].present?
       payee_name ||= 'Topup' if transaction[:is_load]
@@ -24,13 +23,19 @@ class Import::Monzo
       if foreign_transaction
         money = Money.new(transaction[:local_amount].abs, transaction[:local_currency])
         description.prepend("(#{money.format}) ")
-        flag = 'orange'
+        flag = 'orange' unless ENV['SKIP_FOREIGN_CURRENCY_FLAG'].present?
       end
 
-      description.prepend("#{transaction[:merchant][:emoji]} ") if transaction[:merchant].try(:[], :emoji).present?
-      description << transaction[:merchant][:metadata][:suggested_tags] if transaction[:merchant].try(:[], :metadata).try(:[], :suggested_tags).present?
+      unless ENV['SKIP_EMOJI'].present?
+        description.prepend("#{transaction[:merchant][:emoji]} ") if transaction[:merchant].try(:[], :emoji)
+      end
+
+      unless ENV['SKIP_TAGS'].present?
+        description << transaction[:merchant][:metadata][:suggested_tags] if transaction[:merchant].try(:[], :metadata).try(:[], :suggested_tags)
+      end
 
       transactions_to_create << {
+        id: "M#{transaction[:id]}",
         amount: transaction[:amount] * 10,
         payee_name: payee_name,
         date: Time.parse(transaction[:created]).to_date,
@@ -46,7 +51,8 @@ class Import::Monzo
   private
 
   def transactions
-    get("/transactions?account_id=#{@monzo_account_id}&since=#{@from.strftime('%FT%TZ')}&expand[]=merchant")[:transactions]
+    since = @from.present? ? "&since=#{@from.strftime('%FT%TZ')}" : nil
+    get("/transactions?account_id=#{@monzo_account_id}#{since}&expand[]=merchant")[:transactions]
   end
 
   def get(url)
